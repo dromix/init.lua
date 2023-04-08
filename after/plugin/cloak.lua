@@ -20,4 +20,3 @@ require("cloak").setup({
   },
 })
 
-
