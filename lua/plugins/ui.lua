@@ -60,17 +60,6 @@ return {
 		},
 	},
 
-	-- animations
-	-- {
-	-- 	"echasnovski/mini.animate",
-	-- 	event = "VeryLazy",
-	-- 	opts = function(_, opts)
-	-- 		opts.scroll = {
-	-- 			enable = false,
-	-- 		}
-	-- 	end,
-	-- },
-
 	-- buffer line
 	{
 		"akinsho/bufferline.nvim",
@@ -95,8 +84,10 @@ return {
 		event = "VeryLazy",
 		opts = {
 			options = {
-				-- globalstatus = false,
+				icons_enabled = false,
 				theme = "solarized_dark",
+				component_separators = '|',
+        section_separators = '',
 			},
 		},
 	},

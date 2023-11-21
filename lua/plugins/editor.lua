@@ -14,25 +14,6 @@ return {
 	},
 
 	{
-		"echasnovski/mini.hipatterns",
-		event = "BufReadPre",
-		opts = {
-			highlighters = {
-				hsl_color = {
-					pattern = "hsl%(%d+,? %d+,? %d+%)",
-					group = function(_, match)
-						local utils = require("craftzdog.utils")
-						local h, s, l = match:match("hsl%((%d+),? (%d+),? (%d+)%)")
-						h, s, l = tonumber(h), tonumber(s), tonumber(l)
-						local hex_color = utils.hslToHex(h, s, l)
-						return MiniHipatterns.compute_hex_color_group(hex_color, "bg")
-					end,
-				},
-			},
-		},
-	},
-
-	{
 		"dinhhuy258/git.nvim",
 		event = "BufReadPre",
 		opts = {
@@ -51,100 +32,86 @@ return {
 			{
 				"nvim-telescope/telescope-fzf-native.nvim",
 				build = "make",
+				cond = function()
+          return vim.fn.executable 'make' == 1
+        end,
 			},
 			"nvim-telescope/telescope-file-browser.nvim",
 		},
 		keys = {
 			{
-				"<leader>fP",
+				"<leader>?",
 				function()
-					require("telescope.builtin").find_files({
-						cwd = require("lazy.core.config").options.root,
-					})
+					require('telescope.builtin').oldfiles()
 				end,
-				desc = "Find Plugin File",
+				desc = '[?] Find recently opened files',
 			},
 			{
-				";f",
+				"<leader><space>",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.find_files({
-						no_ignore = false,
-						hidden = true,
-					})
+					require('telescope.builtin').buffers()
 				end,
-				desc = "Lists files in your current working directory, respects .gitignore",
+				desc = '[ ] Find existing buffers',
 			},
 			{
-				";r",
+				"<leader>gf",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.live_grep()
+					require('telescope.builtin').git_files()
 				end,
-				desc = "Search for a string in your current working directory and get results live as you type, respects .gitignore",
+				desc = 'Search [G]it [F]iles',
 			},
 			{
-				"\\\\",
+				"<leader>sf",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.buffers()
+					require('telescope.builtin').find_files()
 				end,
-				desc = "Lists open buffers",
+				desc = '[S]earch [F]iles',
 			},
 			{
-				";t",
+				"<leader>sh",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.help_tags()
+					require('telescope.builtin').help_tags()
 				end,
-				desc = "Lists available help tags and opens a new window with the relevant help info on <cr>",
+				desc = '[S]earch [H]elp',
 			},
 			{
-				";;",
+				"<leader>sw",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.resume()
+					require('telescope.builtin').grep_string()
 				end,
-				desc = "Resume the previous telescope picker",
+				desc = '[S]earch current [W]ord',
 			},
 			{
-				";e",
+				"<leader>sg",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.diagnostics()
+					require('telescope.builtin').live_grep()
 				end,
-				desc = "Lists Diagnostics for all open buffers or a specific buffer",
+				desc = '[S]earch by [G]rep',
 			},
 			{
-				";s",
+				"<leader>sd",
 				function()
-					local builtin = require("telescope.builtin")
-					builtin.treesitter()
+					require('telescope.builtin').diagnostics()
 				end,
-				desc = "Lists Function names, variables, from Treesitter",
+				desc = '[S]earch [D]iagnostics',
 			},
 			{
-				"sf",
+				"<leader>sr",
 				function()
-					local telescope = require("telescope")
-
-					local function telescope_buffer_dir()
-						return vim.fn.expand("%:p:h")
-					end
-
-					telescope.extensions.file_browser.file_browser({
-						path = "%:p:h",
-						cwd = telescope_buffer_dir(),
-						respect_gitignore = false,
-						hidden = true,
-						grouped = true,
+					require('telescope.builtin').resume()
+				end,
+				desc = '[S]earch [R]esume',
+			},
+			{
+				"<leader>/",
+				function()
+					require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+						winblend = 10,
 						previewer = false,
-						initial_mode = "normal",
-						layout_config = { height = 40 },
 					})
 				end,
-				desc = "Open File Browser with the path of the current buffer",
-			},
+				desc = '[/] Fuzzily search in current buffer',
+			}
 		},
 		config = function(_, opts)
 			local telescope = require("telescope")

@@ -39,6 +39,12 @@ return {
 		opts = {},
 	},
 
+	-- Harpoon
+	{
+		"theprimeagen/harpoon",
+		opts = {}
+	},
+
 	-- Go forward/backward with square brackets
 	{
 		"echasnovski/mini.bracketed",
@@ -94,4 +100,9 @@ return {
 			table.insert(opts.sources, { name = "emoji" })
 		end,
 	},
+
+	{
+		'numToStr/Comment.nvim',
+		opts = {},
+	}
 }
