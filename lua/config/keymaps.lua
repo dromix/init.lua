@@ -33,7 +33,24 @@ keymap.set('n', '<s-tab>', ':tabprev<Return>', opts)
 keymap.set('n', 'ss', ':split<Return>', opts)
 keymap.set('n', 'sv', ':vsplit<Return>', opts)
 
--- Diagnostics
-keymap.set('n', '<C-j>', function()
-  vim.diagnostic.goto_next()
-end, opts)
+-- Resize window
+keymap.set('n', '<C-w><left>', '<C-w><')
+keymap.set('n', '<C-w><right>', '<C-w>>')
+keymap.set('n', '<C-w><up>', '<C-w>+')
+keymap.set('n', '<C-w><down>', '<C-w>-')
+
+keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+
+keymap.set('n', 'J', 'mzJ`z')
+
+keymap.set('n', '<C-d>', '<C-d>zz')
+keymap.set('n', '<C-u>', '<C-u>zz')
+keymap.set('n', 'n', 'nzzzv')
+keymap.set('n', 'N', 'Nzzzv')
+
+keymap.set('x', '<leader>p', [["_dP]])
+keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
+keymap.set('i', '<C-c>', '<Esc>')
+keymap.set('n', 'Q', '<nop>')
+keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
