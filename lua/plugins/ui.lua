@@ -1,141 +1,93 @@
+local Util = require("lazyvim.util")
+
+-- like lazyvim.util.lualine.pretty_path but with a longer path (3 -> 6)
+---@param opts? {relative: "cwd"|"root", modified_hl: string?}
+local function lualine_pretty_path(opts)
+  opts = vim.tbl_extend("force", {
+    relative = "cwd",
+    modified_hl = "Constant",
+  }, opts or {})
+
+  return function(self)
+    local path = vim.fn.expand("%:p") --[[@as string]]
+
+    if path == "" then
+      return ""
+    end
+    local root = Util.root.get({ normalize = true })
+    local cwd = Util.root.cwd()
+
+    if opts.relative == "cwd" and path:find(cwd, 1, true) == 1 then
+      path = path:sub(#cwd + 2)
+    else
+      path = path:sub(#root + 2)
+    end
+
+    local sep = package.config:sub(1, 1)
+    local parts = vim.split(path, "[\\/]")
+    if #parts > 6 then
+      parts = { parts[1], parts[2], parts[3], parts[4], "…", parts[#parts - 1], parts[#parts] }
+    end
+
+    if opts.modified_hl and vim.bo.modified then
+      parts[#parts] = Util.lualine.format(self, parts[#parts], opts.modified_hl)
+    end
+
+    return table.concat(parts, sep)
+  end
+end
+
 return {
-	-- messages, cmdline and the popupmenu
-	{
-		"folke/noice.nvim",
-		opts = function(_, opts)
-			table.insert(opts.routes, {
-				filter = {
-					event = "notify",
-					find = "No information available",
-				},
-				opts = { skip = true },
-			})
-			local focused = true
-			vim.api.nvim_create_autocmd("FocusGained", {
-				callback = function()
-					focused = true
-				end,
-			})
-			vim.api.nvim_create_autocmd("FocusLost", {
-				callback = function()
-					focused = false
-				end,
-			})
-			table.insert(opts.routes, 1, {
-				filter = {
-					cond = function()
-						return not focused
-					end,
-				},
-				view = "notify_send",
-				opts = { stop = false },
-			})
-
-			opts.commands = {
-				all = {
-					-- options for the message history that you get with `:Noice`
-					view = "split",
-					opts = { enter = true, format = "details" },
-					filter = {},
-				},
-			}
-
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "markdown",
-				callback = function(event)
-					vim.schedule(function()
-						require("noice.text.markdown").keys(event.buf)
-					end)
-				end,
-			})
-
-			opts.presets.lsp_doc_border = true
-		end,
-	},
-
-	{
-		"rcarriga/nvim-notify",
-		opts = {
-			timeout = 5000,
-		},
-	},
-
-	-- buffer line
-	{
-		"akinsho/bufferline.nvim",
-		event = "VeryLazy",
-		keys = {
-			{ "<Tab>", "<Cmd>BufferLineCycleNext<CR>", desc = "Next tab" },
-			{ "<S-Tab>", "<Cmd>BufferLineCyclePrev<CR>", desc = "Prev tab" },
-		},
-		opts = {
-			options = {
-				mode = "tabs",
-				-- separator_style = "slant",
-				show_buffer_close_icons = false,
-				show_close_icon = false,
-			},
-		},
-	},
+  {
+    "rcarriga/nvim-notify",
+    keys = function()
+      return {}
+    end,
+  },
 
 	-- statusline
-	{
-		"nvim-lualine/lualine.nvim",
-		event = "VeryLazy",
-		opts = {
-			options = {
-				icons_enabled = false,
-				theme = "solarized_dark",
-				component_separators = '|',
-        section_separators = '',
-			},
-		},
-	},
-
-	-- filename
-	{
-		"b0o/incline.nvim",
-		dependencies = { "craftzdog/solarized-osaka.nvim" },
-		event = "BufReadPre",
-		priority = 1200,
-		config = function()
-			local colors = require("solarized-osaka.colors").setup()
-			require("incline").setup({
-				highlight = {
-					groups = {
-						InclineNormal = { guibg = colors.magenta500, guifg = colors.base04 },
-						InclineNormalNC = { guifg = colors.violet500, guibg = colors.base03 },
-					},
-				},
-				window = { margin = { vertical = 0, horizontal = 1 } },
-				hide = {
-					cursorline = true,
-				},
-				render = function(props)
-					local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-					if vim.bo[props.buf].modified then
-						filename = "[+] " .. filename
-					end
-
-					local icon, color = require("nvim-web-devicons").get_icon_color(filename)
-					return { { icon, guifg = color }, { " " }, { filename } }
-				end,
-			})
-		end,
-	},
+ {
+    "nvim-lualine/lualine.nvim",
+    opts = function(_, opts)
+      opts.sections.lualine_a =
+        { {
+          "mode",
+          fmt = function(str)
+            return str:sub(1, 1)
+          end,
+        } }
+      opts.sections.lualine_c[4] = { lualine_pretty_path() }
+      -- move metals status to the left
+      opts.sections.lualine_z = opts.sections.lualine_y
+      opts.sections.lualine_y = opts.sections.lualine_x
+      opts.sections.lualine_x = { "g:metals_status" }
+      -- remove dap:
+      -- table.remove(opts.sections.lualine_y, 3)
+    end,
+  },
 
 	{
-		"folke/zen-mode.nvim",
-		cmd = "ZenMode",
-		opts = {
-			plugins = {
-				gitsigns = true,
-				tmux = true,
-				kitty = { enabled = false, font = "+2" },
-			},
-		},
-		keys = { { "<leader>z", "<cmd>ZenMode<cr>", desc = "Zen Mode" } },
-	},
+    "akinsho/bufferline.nvim",
+    opts = {
+      options = {
+        show_buffer_close_icons = false,
+      },
+    },
+    keys = {
+      { "<space>t", "<Cmd>BufferLinePick<CR>", desc = "Buffer picker" },
+      { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle pin" },
+      { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete non-pinned buffers" },
+      { "<leader>1", "<Cmd>BufferLineGoToBuffer 1<CR>" },
+      { "<leader>2", "<Cmd>BufferLineGoToBuffer 2<CR>" },
+      { "<leader>3", "<Cmd>BufferLineGoToBuffer 3<CR>" },
+      { "<leader>4", "<Cmd>BufferLineGoToBuffer 4<CR>" },
+      { "<leader>5", "<Cmd>BufferLineGoToBuffer 5<CR>" },
+      { "<leader>6", "<Cmd>BufferLineGoToBuffer 6<CR>" },
+      { "<leader>7", "<Cmd>BufferLineGoToBuffer 7<CR>" },
+      { "<leader>8", "<Cmd>BufferLineGoToBuffer 8<CR>" },
+      { "<leader>9", "<Cmd>BufferLineGoToBuffer 9<CR>" },
+    },
+  },
 
 	{
 		"nvimdev/dashboard-nvim",

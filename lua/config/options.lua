@@ -41,8 +41,8 @@ vim.o.mouse = 'a' -- Enable mouse in all modes
 
 -- Undercurl settings for color terminals
 vim.opt.termguicolors = true -- Enable true color support
-vim.cmd([[let &t_Cs = "\e[4:3m"]]) -- Set undercurl start sequence
-vim.cmd([[let &t_Ce = "\e[4:0m"]]) -- Set undercurl end sequence
+-- vim.cmd([[let &t_Cs = "\e[4:3m"]]) -- Set undercurl start sequence
+-- vim.cmd([[let &t_Ce = "\e[4:0m"]]) -- Set undercurl end sequence
 
 -- Formatting options
 vim.opt.formatoptions:append({ "r" }) -- Automatically insert the current comment leader after hitting <Enter> in Insert mode
