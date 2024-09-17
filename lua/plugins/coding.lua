@@ -1,109 +1,101 @@
 return {
-  -- Create annotations with one keybind, and jump your cursor in the inserted annotation
+  -- swap arguments and things
   {
-    'danymat/neogen',
+    "mizlan/iswap.nvim",
     keys = {
-      {
-        '<leader>cc',
-        function()
-          require('neogen').generate {}
-        end,
-        desc = 'Neogen Comment',
-      },
+      { "gw", ":ISwapWithRight<cr>", desc = "Swap two arguments" },
+      { "<leader>is", ":ISwap<cr>", desc = "Swap many arguments" },
     },
-    opts = { snippet_engine = 'luasnip' },
-  },
-
-  -- Incremental rename
-  {
-    'smjonas/inc-rename.nvim',
-    cmd = 'IncRename',
-    config = true,
-  },
-
-  -- Refactoring tool
-  {
-    'ThePrimeagen/refactoring.nvim',
-    keys = {
-      {
-        '<leader>r',
-        function()
-          require('refactoring').select_refactor()
-        end,
-        mode = 'v',
-        noremap = true,
-        silent = true,
-        expr = false,
-      },
-    },
-    opts = {},
-  },
-
-  -- Harpoon
-  {
-    'theprimeagen/harpoon',
-    opts = {},
-  },
-
-  -- Go forward/backward with square brackets
-  {
-    'echasnovski/mini.bracketed',
-    event = 'BufReadPost',
-    config = function()
-      local bracketed = require 'mini.bracketed'
-      bracketed.setup {
-        file = { suffix = '' },
-        window = { suffix = '' },
-        quickfix = { suffix = '' },
-        yank = { suffix = '' },
-        treesitter = { suffix = 'n' },
-      }
-    end,
-  },
-
-  -- Better increase/descrease
-  {
-    'monaqa/dial.nvim',
-    -- stylua: ignore
-    keys = {
-      { "<C-a>", function() return require("dial.map").inc_normal() end, expr = true, desc = "Increment" },
-      { "<C-x>", function() return require("dial.map").dec_normal() end, expr = true, desc = "Decrement" },
-    },
-    config = function()
-      local augend = require 'dial.augend'
-      require('dial.config').augends:register_group {
-        default = {
-          augend.integer.alias.decimal,
-          augend.integer.alias.hex,
-          augend.date.alias['%Y/%m/%d'],
-          augend.constant.alias.bool,
-          augend.semver.alias.semver,
-          augend.constant.new { elements = { 'let', 'const' } },
-        },
-      }
-    end,
-  },
-
-  {
-    'simrat39/symbols-outline.nvim',
-    keys = { { '<leader>cs', '<cmd>SymbolsOutline<cr>', desc = 'Symbols Outline' } },
-    cmd = 'SymbolsOutline',
     opts = {
-      position = 'right',
+      keys = "arstdhneio",
+    },
+  },
+
+  -- auto completion
+  {
+    "hrsh7th/nvim-cmp",
+    opts = function(_, opts)
+      local cmp = require("cmp")
+      opts.mapping = cmp.mapping.preset.insert({
+        ["<C-Space>"] = function()
+          if cmp.visible() then
+            cmp.confirm({ select = true })
+          else
+            cmp.complete()
+          end
+        end,
+        ["<C-c>"] = cmp.mapping.abort(),
+      })
+    end,
+  },
+
+  -- 30ms of load time for not much use
+  { "rafa madriz/friendly-snippets", enabled = false },
+  { "garymjr/nvim-snippets", enabled = false },
+
+  { "echasnovski/mini.pairs", enabled = false },
+
+  -- surround
+  {
+    "echasnovski/mini.surround",
+    opts = {
+      mappings = {
+        add = "<space>sa", -- Add surrounding in Normal and Visual modes
+        delete = "<space>sd", -- Delete surrounding
+        find = "<space>sf", -- Find surrounding (to the right)
+        find_left = "<space>sF", -- Find surrounding (to the left)
+        highlight = "<space>sh", -- Highlight surrounding
+        replace = "<space>sr", -- Replace surrounding
+        update_n_lines = "<space>sn", -- Update `n_lines`
+      },
     },
   },
 
   {
-    'nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-emoji' },
-    opts = function(_, opts)
-      table.insert(opts.sources, { name = 'emoji' })
-    end,
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        nix = { "nixfmt" },
+        scss = { "prettierd" },
+        typescript = { "eslint_d" },
+        markdown = { "prettierd" },
+        ["markdown.mdx"] = { "prettierd" },
+      },
+    },
   },
 
   {
-    'numToStr/Comment.nvim',
-    opts = {},
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        "bash",
+        "c",
+        "css",
+        "diff",
+        "html",
+        "javascript",
+        "jsdoc",
+        "json",
+        "jsonc",
+        "lua",
+        "luadoc",
+        "luap",
+        "markdown",
+        "markdown_inline",
+        "nix",
+        "printf",
+        "python",
+        "query",
+        "regex",
+        "scss",
+        "toml",
+        "tsx",
+        "typescript",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
+      },
+    },
   },
 }
-

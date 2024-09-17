@@ -1,56 +1,71 @@
-local util = require 'util'
+-- Keymaps are automatically loaded on the VeryLazy event                                                                   █
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua         █
+-- Add any additional keymaps here
 
-util.cowboy()
+-- require("config.keymaps_colemak")
+-- require("config.keymaps_lazyvim")
 
-local keymap = vim.keymap
-local opts = { noremap = true, silent = true }
+local function map(mode, lhs, rhs, opts)
+  local keys = require("lazy.core.handler").handlers.keys
+  ---@cast keys LazyKeysHandler
+  -- do not create the keymap if a lazy keys handler exists
+  if not keys.active[keys.parse({ lhs, mode = mode }).id] then
+    opts = opts or {}
+    opts.silent = opts.silent ~= false
+    vim.keymap.set(mode, lhs, rhs, opts)
+  end
+end
 
-keymap.set('n', 'x', '"_x')
+map("n", "!", ":!")
 
--- Increment/decrement
-keymap.set('n', '+', '<C-a>')
-keymap.set('n', '-', '<C-x>')
+-- close quickfix and other pesky windows
+map("n", "<leader>wo", "<cmd>only<cr>", { desc = "Close other windows" })
 
--- Delete a word backwards
-keymap.set('n', 'dw', 'vb"_d')
+-- delete buffer and file
+map("n", "<leader>bD", "<cmd>!rm %<cr>:bd!<cr>", { desc = "Delete file" })
 
--- Select all
-keymap.set('n', '<C-a>', 'gg<S-v>G')
+-- Copy current file path to registers "* and "+
+map("n", "<leader>cp", "<cmd>let @*=@%<cr>:let @+=@%<cr>")
 
--- Disable continuations
-keymap.set('n', '<Leader>o', 'o<Esc>^Da', opts)
-keymap.set('n', '<Leader>O', 'O<Esc>^Da', opts)
+-- Start a substitute
+map("n", "<leader>ss", ":%s/")
 
--- Jumplist
-keymap.set('n', '<C-m>', '<C-i>', opts)
+-- Pull word under cursor into LHS of a substitute (for quick search and replace)
+map("n", "<leader>zs", ':%s#<C-r>=expand("<cword>")<cr>#')
 
--- New tab
-keymap.set('n', 'te', ':tabedit')
-keymap.set('n', '<tab>', ':tabnext<Return>', opts)
-keymap.set('n', '<s-tab>', ':tabprev<Return>', opts)
+-- wordwise yank from line above
+vim.cmd([[
+inoremap <silent> <C-Y> <C-C>:let @z = @"<cr>mz
+      \:exec 'normal!' (col('.')==1 && col('$')==1 ? 'k' : 'kl')<cr>
+      \:exec (col('.')==col('$')-1 ? 'let @" = @_' : 'normal! yw')<cr>
+      \`zp:let @" = @z<cr>a
+]])
 
--- Split window
-keymap.set('n', 'ss', ':split<Return>', opts)
-keymap.set('n', 'sv', ':vsplit<Return>', opts)
+-- Make the current file executable
+map("n", "<leader>%", ":!chmod +x %<cr>")
 
--- Resize window
-keymap.set('n', '<C-w><left>', '<C-w><')
-keymap.set('n', '<C-w><right>', '<C-w>>')
-keymap.set('n', '<C-w><up>', '<C-w>+')
-keymap.set('n', '<C-w><down>', '<C-w>-')
+-- Expand current filed dir in console mode
+map("c", "%%", "<C-R>=expand('%:h').'/'<cr>")
 
-keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
-keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+-- Jump to line AND col
+map("n", "'", "`")
 
-keymap.set('n', 'J', 'mzJ`z')
+-- Add empty lines before and after cursor line
+map("n", "[<space>", "<Cmd>call append(line('.') - 1, repeat([''], v:count1))<CR>", { desc = "Put empty line above" })
+map("n", "]<space>", "<Cmd>call append(line('.'),     repeat([''], v:count1))<CR>", { desc = "Put empty line below" })
 
-keymap.set('n', '<C-d>', '<C-d>zz')
-keymap.set('n', '<C-u>', '<C-u>zz')
-keymap.set('n', 'n', 'nzzzv')
-keymap.set('n', 'N', 'Nzzzv')
+-- Reselect latest changed, put, or yanked text
+map(
+  "n",
+  "<leader>v",
+  '"`[" . strpart(getregtype(), 0, 1) . "`]"',
+  { expr = true, desc = "Visually select changed text" }
+)
 
-keymap.set('x', '<leader>p', [["_dP]])
-keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
-keymap.set('i', '<C-c>', '<Esc>')
-keymap.set('n', 'Q', '<nop>')
-keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>')
+-- Correct latest misspelled word by taking first suggestion.
+-- Use `<C-g>u` in Insert mode to mark this as separate undoable action.
+-- Source: https://stackoverflow.com/a/16481737
+-- NOTE: this remaps `<C-z>` in Normal mode (completely stops Neovim), but
+-- it seems to be too harmful anyway.
+map("n", "<C-Z>", "[s1z=", { desc = "Correct latest misspelled word" })
+map("i", "<C-Z>", "<C-g>u<Esc>[s1z=`]a<C-g>u", { desc = "Correct latest misspelled word" })

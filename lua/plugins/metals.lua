@@ -3,7 +3,6 @@ return {
   -- scala lsp
   {
     "scalameta/nvim-metals",
-    dependencies = { "nvim-lua/plenary.nvim" },
     ft = { "scala", "sbt", "java" },
     -- stylua: ignore
     keys = {
@@ -14,36 +13,18 @@ return {
       local metals = require("metals")
       local config = metals.bare_config()
 
+      config.init_options.statusBarProvider = "on"
       config.settings = {
         showImplicitArguments = true,
-        excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+        excludedPackages = { "akka.actor.typed.javadsl" },
         serverProperties = { "-Xmx2g" },
         serverVersion = "latest.snapshot",
       }
 
-      config.init_options.statusBarProvider = "on"
-
-      -- cmp integration
       config.capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local dap = require("dap")
-      dap.configurations.scala = {
-        {
-          type = "scala",
-          request = "launch",
-          name = "RunOrTest",
-          metals = {
-            runType = "runOrTestFile",
-          },
-        },
-      }
-      dap.listeners.after["event_terminated"]["nvim-metals"] = function()
-        -- vim.notify("Tests have finished!")
-        dap.repl.open()
-      end
-
       config.on_attach = function(client, bufnr)
-        metals.setup_dap()
+        -- metals.setup_dap()
         require("lsp-format").on_attach(client, bufnr)
       end
 

@@ -1,199 +1,130 @@
 return {
+  -- sudo with password prompt
+  -- {
+  --   "lambdalisue/suda.vim",
+  -- },
+  -- yank ring
   {
-    enabled = false,
-    'folke/flash.nvim',
+    "gbprod/yanky.nvim",
+    enabled = true,
+    opts = { highlight = { timer = 150 } },
+    event = "LazyFile",
+    -- stylua: ignore
+    keys = {
+      { "<leader>mp", function() require("telescope").extensions.yank_history.yank_history({}) end, desc = "Open Yank History", },
+      { "y", "<Plug>(YankyYank)", mode = { "n", "x" }, desc = "Yank Text", },
+      { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" }, desc = "Put Yanked Text After Cursor", },
+      { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" }, desc = "Put Yanked Text Before Cursor", },
+      { "gp", "<Plug>(YankyGPutAfter)", mode = { "n", "x" }, desc = "Put Yanked Text After Selection", },
+      { "<c-,>", "<Plug>(YankyCycleForward)" },
+      { "<c-.>", "<Plug>(YankyCycleBackward)" },
+      { "]p", "<Plug>(YankyPutIndentAfterLinewise)", desc = "Put Indented After Cursor (Linewise)" },
+      { "[p", "<Plug>(YankyPutIndentBeforeLinewise)", desc = "Put Indented Before Cursor (Linewise)" },
+    },
+  },
+
+  {
+    "folke/flash.nvim",
     ---@type Flash.Config
     opts = {
-      search = {
-        forward = true,
-        multi_window = false,
-        wrap = false,
-        incremental = true,
-      },
-    },
-  },
-
-  {
-    'dinhhuy258/git.nvim',
-    event = 'BufReadPre',
-    opts = {
-      keymaps = {
-        -- Open blame window
-        blame = '<Leader>gb',
-        -- Open file/folder in git repository
-        browse = '<Leader>go',
-      },
-    },
-  },
-
-  {
-    'telescope.nvim',
-    dependencies = {
-      {
-        'nvim-telescope/telescope-fzf-native.nvim',
-        build = 'make',
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
-      },
-      'nvim-telescope/telescope-file-browser.nvim',
-    },
-    keys = {
-      {
-        '<leader>pv',
-        function()
-          local telescope = require 'telescope'
-
-          local function telescope_buffer_dir()
-            return vim.fn.expand '%:p:h'
-          end
-
-          telescope.extensions.file_browser.file_browser {
-            path = '%:p:h',
-            cwd = telescope_buffer_dir(),
-            respect_gitignore = false,
-            hidden = true,
-            grouped = true,
-            previewer = false,
-            initial_mode = 'normal',
-            layout_config = { height = 40 },
-          }
-        end,
-        desc = 'Open File Browser with the path of the current buffer',
-      },
-      {
-        '<leader>?',
-        function()
-          require('telescope.builtin').oldfiles()
-        end,
-        desc = '[?] Find recently opened files',
-      },
-      {
-        '<leader><space>',
-        function()
-          require('telescope.builtin').buffers()
-        end,
-        desc = '[ ] Find existing buffers',
-      },
-      {
-        '<leader>gf',
-        function()
-          require('telescope.builtin').git_files()
-        end,
-        desc = 'Search [G]it [F]iles',
-      },
-      {
-        '<leader>sf',
-        function()
-          require('telescope.builtin').find_files()
-        end,
-        desc = '[S]earch [F]iles',
-      },
-      {
-        '<leader>sh',
-        function()
-          require('telescope.builtin').help_tags()
-        end,
-        desc = '[S]earch [H]elp',
-      },
-      {
-        '<leader>sw',
-        function()
-          require('telescope.builtin').grep_string()
-        end,
-        desc = '[S]earch current [W]ord',
-      },
-      {
-        '<leader>sg',
-        function()
-          require('telescope.builtin').live_grep()
-        end,
-        desc = '[S]earch by [G]rep',
-      },
-      {
-        '<leader>sd',
-        function()
-          require('telescope.builtin').diagnostics()
-        end,
-        desc = '[S]earch [D]iagnostics',
-      },
-      {
-        '<leader>sr',
-        function()
-          require('telescope.builtin').resume()
-        end,
-        desc = '[S]earch [R]esume',
-      },
-      {
-        '<leader>/',
-        function()
-          require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-            winblend = 10,
-            previewer = false,
-          })
-        end,
-        desc = '[/] Fuzzily search in current buffer',
-      },
-    },
-    config = function(_, opts)
-      local telescope = require 'telescope'
-      local actions = require 'telescope.actions'
-      local fb_actions = require('telescope').extensions.file_browser.actions
-
-      opts.defaults = vim.tbl_deep_extend('force', opts.defaults, {
-        wrap_results = true,
-        layout_strategy = 'horizontal',
-        layout_config = { prompt_position = 'top' },
-        sorting_strategy = 'ascending',
-        winblend = 0,
-        file_ignore_patterns = {"node_modules"},
-        mappings = {
-          n = {},
+      labels = "nteshdlpufiryw",
+      modes = {
+        char = {
+          enabled = false,
+          label = { exclude = "rdc" },
         },
-      })
-      opts.pickers = {
-        diagnostics = {
-          theme = 'ivy',
-          initial_mode = 'normal',
-          layout_config = {
-            preview_cutoff = 9999,
-          },
+        treesitter = {
+          label = { before = false, after = false },
         },
+      },
+    },
+    keys = function()
+      -- stylua: ignore
+      return {
+        { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
+        { "S",     mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+        -- { "r", mode = "o", function() requiee("flash").remote() end, desc = "Remote Flash" },
+        -- { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+        { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,     desc = "Toggle Flash Search" },
       }
-      opts.extensions = {
-        file_browser = {
-          theme = 'dropdown',
-          -- disables netrw and use telescope-file-browser in its place
-          hijack_netrw = true,
-          mappings = {
-            -- your custom insert mode mappings
-            ['n'] = {
-              -- your custom normal mode mappings
-              ['N'] = fb_actions.create,
-              ['h'] = fb_actions.goto_parent_dir,
-              ['/'] = function()
-                vim.cmd 'startinsert'
-              end,
-              ['<C-u>'] = function(prompt_bufnr)
-                for i = 1, 10 do
-                  actions.move_selection_previous(prompt_bufnr)
-                end
-              end,
-              ['<C-d>'] = function(prompt_bufnr)
-                for i = 1, 10 do
-                  actions.move_selection_next(prompt_bufnr)
-                end
-              end,
-              ['<PageUp>'] = actions.preview_scrolling_up,
-              ['<PageDown>'] = actions.preview_scrolling_down,
-            },
-          },
-        },
-      }
-      telescope.setup(opts)
-      require('telescope').load_extension 'fzf'
-      require('telescope').load_extension 'file_browser'
     end,
   },
-}
 
+  { "folke/todo-comments.nvim", enabled = false },
+
+  {
+    "folke/trouble.nvim",
+    opts = {
+      auto_close = true, -- auto close when there are no items
+      -- auto_preview = true, -- automatically open preview when on an item
+      auto_refresh = true, -- auto refresh when open
+      modes = {
+        -- errors = {
+        --   mode = "diagnostics", -- inherit from diagnostics mode
+        --   auto_open = false, -- auto open when there are items
+        --   filter = {
+        --     any = {
+        --       {
+        --         severity = vim.diagnostic.severity.ERROR, -- errors only
+        --       },
+        --     },
+        --   },
+        -- },
+        -- mydiags = {
+        --   mode = "diagnostics", -- inherit from diagnostics mode
+        --   auto_open = true, -- auto open when there are items
+        --   filter = {
+        --     any = {
+        --       buf = 0, -- current buffer
+        --       {
+        --         severity = vim.diagnostic.severity.ERROR, -- errors only
+        --         -- limit to files in the current project
+        --         function(item)
+        --           return item.filename:find((vim.loop or vim.uv).cwd(), 1, true)
+        --         end,
+        --       },
+        --     },
+        --   },
+        -- },
+        cascade = {
+          mode = "diagnostics", -- inherit from diagnostics mode
+          auto_open = false, -- auto open when there are items
+          filter = function(items)
+            local severity = vim.diagnostic.severity.HINT
+            for _, item in ipairs(items) do
+              severity = math.min(severity, item.severity)
+            end
+            return vim.tbl_filter(function(item)
+              return item.severity == severity
+            end, items)
+          end,
+        },
+      },
+    },
+    keys = {
+      { "<space>d", "<cmd>Trouble cascade toggle<cr>", desc = "Diagnostics (Trouble)" },
+      {
+        "<space><space>",
+        "<cmd>Trouble cascade open focus=true<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+    },
+  },
+
+  -- open file in GitHub
+  {
+    "almo7aya/openingh.nvim",
+    lazy = true,
+    keys = {
+      { "<leader>gH", "<cmd>OpenInGHFileLines!<cr>", mode = "v", desc = "Open file in GitHub" },
+    },
+  },
+
+  {
+    "gabrielpoca/replacer.nvim",
+    lazy = true,
+    keys = {
+      { "<leader>qr", ':lua require("replacer").run()<cr>', desc = "QuickFix Replacer" },
+    },
+  },
+}
