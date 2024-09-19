@@ -162,10 +162,8 @@ return {
           end,
         } }
       opts.sections.lualine_c[4] = { lualine_pretty_path() }
-      -- move metals status to the left
       opts.sections.lualine_z = opts.sections.lualine_y
       opts.sections.lualine_y = opts.sections.lualine_x
-      opts.sections.lualine_x = { "g:metals_status" }
       -- remove dap:
       -- table.remove(opts.sections.lualine_y, 3)
     end,
